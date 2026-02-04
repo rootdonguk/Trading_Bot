@@ -300,6 +300,7 @@ try:
                 profit_history
             )
             
+            virtual_profit = abs(virtual_profit)
             # 누적
             accumulated_amount += virtual_profit
             
