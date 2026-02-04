@@ -1,4 +1,6 @@
-# 패키지 설치
+# =======================
+# 패키지 설치/로드
+# =======================
 install.packages(c("httr", "jsonlite", "ggplot2", "dplyr"))
 library(httr)
 library(jsonlite)
@@ -6,7 +8,7 @@ library(ggplot2)
 library(dplyr)
 
 # =======================
-# Binance Testnet API
+# Binance Testnet 설정
 # =======================
 api_key <- "YOUR_TESTNET_API_KEY"
 api_secret <- "YOUR_TESTNET_API_SECRET"
@@ -17,8 +19,11 @@ initial_capital <- 0.3
 leverage <- 20
 fee_rate <- 0.001
 n_steps <- 50
-sleep_sec <- 1  # 가격 조회 간격 (초)
+sleep_sec <- 1  # 가격 조회 간격(초)
 
+# =======================
+# 데이터프레임 초기화
+# =======================
 df <- data.frame(
   step = 1:n_steps,
   price = numeric(n_steps),
@@ -33,8 +38,6 @@ df <- data.frame(
 df$capital_before[1] <- initial_capital
 df$capital_after[1] <- initial_capital
 
-capital <- initial_capital
-
 # =======================
 # 시뮬레이션 루프
 # =======================
@@ -46,8 +49,8 @@ for(i in 1:n_steps){
   df$price[i] <- price
   
   if(i == 1){
-    df$capital_before[i] <- capital
-    df$capital_after[i] <- capital
+    df$capital_before[i] <- initial_capital
+    df$capital_after[i] <- initial_capital
     df$position[i] <- "LONG"
     next
   }
@@ -55,9 +58,10 @@ for(i in 1:n_steps){
   prev_capital <- df$capital_after[i-1]
   df$capital_before[i] <- prev_capital
   
-  # 시뮬레이션 가격 변동률 (실전: 실제 전략 적용)
+  # 가격 변동률 계산
   change_pct <- (price - df$price[i-1]) / df$price[i-1]
   
+  # 포지션 결정
   position <- ifelse(change_pct >= 0, "LONG", "SHORT")
   df$position[i] <- position
   
@@ -70,11 +74,11 @@ for(i in 1:n_steps){
   df$fee[i] <- fee
   df$capital_after[i] <- capital_new
   
-  Sys.sleep(sleep_sec)  # 가격 반영 시간
+  Sys.sleep(sleep_sec)  # 가격 반영 대기
 }
 
 # =======================
-# 요약
+# 요약 출력
 # =======================
 summary_df <- df %>%
   summarise(
@@ -87,9 +91,9 @@ summary_df <- df %>%
     net_profit = last(capital_after) - first(capital_before)
   )
 
-print("==== 전체 시뮬레이션 요약 ====")
+cat("==== 전체 시뮬레이션 요약 ====\n")
 print(summary_df)
-print("==== 단계별 샘플 (처음 10 단계) ====")
+cat("==== 단계별 샘플 (처음 10 단계) ====\n")
 print(df[1:10, ])
 
 # =======================
@@ -106,4 +110,6 @@ ggplot(df, aes(x = step, y = capital_after, color = position)) +
     color = "Position"
   ) +
   theme_minimal() +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 16))
+  ggplot2::theme(
+    plot.title = ggplot2::element_text(hjust = 0.5, face = "bold", size = 16)
+  )
