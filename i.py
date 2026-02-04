@@ -24,6 +24,18 @@ except Exception as e:
     print(f"❌ 시간 동기화 오류: {e}", flush=True)
     exit()
 
+try:
+    # 단방향 모드로 설정 (dualSidePosition=False)
+    client.futures_change_position_mode(dualSidePosition=False)
+    print(f"✅ 포지션 모드: 단방향(One-Way) 설정 완료!", flush=True)
+except Exception as e:
+    # 이미 설정되어 있으면 에러가 나지만 무시
+    if "No need to change position side" in str(e):
+        print(f"✅ 포지션 모드: 이미 단방향 모드로 설정됨", flush=True)
+    else:
+        print(f"⚠️  포지션 모드 설정 경고: {e}", flush=True)
+        print(f"   계속 진행합니다...", flush=True)
+
 # =======================
 # 🔥 혁명적 전략 설정 🔥
 # =======================
